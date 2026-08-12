@@ -4,8 +4,8 @@ import requests
 
 def main():
     parser = argparse.ArgumentParser(description="fazendo desafio do pablo sem frame-work")
-    parser.add_argument("--cep",type=str,required=True)
-    parser.add_argument("--natan",type=str,required=True)
+    parser.add_argument("--cep",type=str,required=True,default=True)
+    parser.add_argument("--natan",type=str,required=True,default=True)
 
     args = parser.parse_args()
     cep= args.cep.replace("-","").strip()
