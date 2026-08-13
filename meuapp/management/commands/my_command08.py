@@ -1,33 +1,27 @@
 """fazendo o mesmo desafio sem framework"""
 import argparse
 import requests
+from pprint import pformat
 
 def main():
-    parser = argparse.ArgumentParser(description="fazendo desafio do pablo sem frame-work")
-    parser.add_argument("--cep",type=str,required=True,default=True)
-    parser.add_argument("--natan",type=str,required=True,default=True)
-
-    args = parser.parse_args()
-    cep= args.cep.replace("-","").strip()
-    url= f"https://viacep.com.br/ws/{cep}/json/"
+    parser= argparse.ArgumentParser(description="Desafio do Pablito script sem Framework!")
+    parser.add_argument("--cep",type=str,required=True)
+    parser.add_argument("--fiz-sozinho",type=str,required=True)
+    arguments= parser.parse_args()
+    cep= arguments.cep.replace("-","").strip()
+    url= url = f"https://viacep.com.br/ws/{cep}/json/"
+    if len(cep) != 8 or not cep.isdigit():
+        messager_error= f"error: cep deve contem 8 digitos"
+        print(messager_error)
     try:
-        resq= requests.get(url)
-        if resq.status_code == 200:
-            data= resq.json()
-            result={
-                "cep": data.get("cep"),
-                "logradouro": data.get("logradouro"),
-                "bairro": data.get("bairro"),
-                "uf": data.get("uf"),
-                "regiao": data.get("regiao"),
-                "ibge": data.get("ibge")
-            }
-            print(f"result in request: {result}")
-        else:
-            print(f"error in request:{resq.status_code}")
-    except ValueError as error:
-        print(f"error in connection:{error}")
+        requi= requests.get(url,timeout=15)
+        if requi.status_code ==200:
+            dados=requi.json()
+            results= {"cep": dados["cep"],"logradouro": dados["logradouro"],"local": dados["localidade"],"bairro": dados["bairro"],"uf": dados["uf"],"ibge": dados["ibge"]}
+            format= pformat(results)
+            print(f"{format}")
+    except requests.RequestException as error:
+        print(f"error in request:{error}")
 
 if __name__ == "__main__":
-    print("fiz sozinho")
     main()
