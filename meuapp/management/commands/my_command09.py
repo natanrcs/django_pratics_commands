@@ -2,18 +2,20 @@
 from azure.containerregistry import ContainerRegistryClient
 from azure.identity import DefaultAzureCredential
 
-endpoint_the_url= "https://devnatanrcs.azurecr.io"
+endpoint_url= "https://devnatanrcs.azurecr.io" 
 credential= DefaultAzureCredential()
 try:
-    client= ContainerRegistryClient(endpoint_the_url,credential)
+    client= ContainerRegistryClient(endpoint_url,credential)
 except ValueError as error:
-    print(f"error in connection {error}")
+    raise ValueError(f"invalid client configuration: {error}") from error
 
 
-def read_list_repositorys():
-    for all_repository in client.list_repository_names():
-        print(f"all repository in acr: {all_repository}")
+
+def list_repositories():
+    repositories= client.list_repository_names()
+    for repository in repositories:
+        print(repository)
+    return repositories
 
 if __name__ == "__main__":
-    read_list_repositorys()
-
+    list_repositories()
