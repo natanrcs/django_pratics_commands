@@ -1,7 +1,7 @@
 from azure.containerregistry import ContainerRegistryClient
 from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import ResourceNotFoundError
-if __name__ == "__main__":
+def main():
     credential = DefaultAzureCredential()
     while True:
         url = input("digite uma url meu parça: ").lower().strip()
@@ -10,8 +10,14 @@ if __name__ == "__main__":
         except ValueError as error:
             print(f"error in connection:{error}")
             continue
-        try:
-            chose = int(input("escolha: 1-listar imagem ou 2-deletar imagem ou 3-para sair: "))
+
+        while True:
+            try:
+                chose = int(input("escolha: 1-listar imagem ou 2-deletar imagem ou 3-para sair: "))
+            except ValueError:
+                print("apenas 1,2 ou 3.")
+                continue
+
             if chose == 1:
                 try:
                     repositories = client.list_repository_names()
@@ -40,8 +46,10 @@ if __name__ == "__main__":
             elif chose == 3:
                 msg = f"exit inté..!"
                 print(msg)
-                break
+                return
             else:
                 print("option invalid,try again.")
-        except ValueError:
-            print("apenas 1,2 ou 3.")
+
+
+if __name__ == "__main__":
+    main()
