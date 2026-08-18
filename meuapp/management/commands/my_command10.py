@@ -2,7 +2,6 @@ from azure.containerregistry import ContainerRegistryClient
 from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import ResourceNotFoundError
 credential = DefaultAzureCredential()
-#  https://devnatanrcs.azurecr.io
 while True:
     url = input("digite uma url meu parça: ").lower().strip()
     try:
