@@ -1,6 +1,7 @@
 from azure.containerregistry import ContainerRegistryClient
 from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import ResourceNotFoundError
+# https://devnatanrcs.azurecr.io
 
 def menu():
     print("Escolha uma opcao abaixo: ")
@@ -8,6 +9,7 @@ def menu():
     print("2-Deletar images: ")
     print("3-Sair")
     print("4-Saudação: ")
+    print("5-Teste")
 
 def saudacao():
     nome = input("Insira seu nome: ").strip()
@@ -24,18 +26,10 @@ def validate_url(url:str):
     return True
 
 def registry_client(url:str,credential: DefaultAzureCredential) -> ContainerRegistryClient:
-    try:
-     return ContainerRegistryClient(url, credential)
-    except ValueError as error:
-        print(f"error in connection:{error}")
-        return None
+    return ContainerRegistryClient(url,credential)
 
 def azure_auth() -> DefaultAzureCredential:
-    try:
-        return DefaultAzureCredential()
-    except Exception as error:
-        print(f"Error in credentials: {error}")
-        return None
+    return DefaultAzureCredential()
 
 def list_images(client: ContainerRegistryClient):
     try:
@@ -45,35 +39,64 @@ def list_images(client: ContainerRegistryClient):
     except Exception as error:
         print(f"{error}")
 
-def delete_images(client: ContainerRegistryClient, repository: str, tag: str):
+
+
+def delete_manifest(client: ContainerRegistryClient,repository: str, digest: str):
     try:
-        client.delete_manifest(repository, tag)
-        print(f"Delete feito {repository}:{tag}")
+        client.delete_manifest(repository,digest)
+        print(f"{repository}:{digest} deletado com sucesso!")
     except ResourceNotFoundError:
-        print(f"{repository} nao encontrado")
-    except Exception as error:
-        print(f"Erro ao deletar {error}")
+        print(f"{repository}:{digest} nao encontrado.")
+    except Exception:
+        print(f"{repository}:{digest} nao foi possivel deletar!")
+
+
+def list_tags(client: ContainerRegistryClient, repository: str):
+    try:
+        tags = client.list_tag_properties(repository)
+        for tag in tags:
+            print(f"{tag.name}")
+            print(f"{tag.digest}")
+        option = input("Oque deseja excluir tag ou digest: ")
+        if option == "tag":
+            tag_nome = input("Insira a tag: ").strip()
+            if not tag_nome:
+                print(f"{tag_nome} vazia ou nao encontrada.")
+            client.delete_tag(repository,tag_nome)
+            print(f"{repository}:{tag_nome} deletado com sucesso.")
+        elif option == "digest":
+            digest = input("Insira um digest: ")
+            if not digest:
+                print(f"{digest} vazio ou nao encontrado.")
+            client.delete_manifest(repository,digest)
+            print(f"{repository}:{digest} deletado com sucesso")
+        else:
+            print(f"Error,{option} invalido")
+    except ResourceNotFoundError:
+        print(f"Nenhum {repository} encontrado")
+    except Exception:
+        print(f"Erro ao deletar {repository}")
+        
 
 def main():
-    authenticator = azure_auth()
     b = 1
     url = input("Digite uma url: ").strip()
     if not validate_url(url):
         print("URL invalida.")
         return
-    client = registry_client(url, authenticator)
-    if client is None:
-        print("Nao foi possivel conectar ao registry.")
-        return
+    try:
+        authenticator = azure_auth()
+        client = registry_client(url, authenticator)
+    except ValueError as error:
+        print(f"Error ao criar o Client: {error}")
     while b == 1:
         menu()
         opcao = input("Insira uma opcao: ")
         if opcao == "1":
             list_images(client)
         elif opcao == "2":
-            repository = input("Insira um repository: ")
-            tag = input("Insira uma tag ou digest: ")
-            delete_images(client, repository, tag)
+            repository = input("Insira um repo: ")
+            list_tags(client,repository)
         elif opcao == "3":
             print("Saindo...")
             b = 0
@@ -82,3 +105,4 @@ def main():
         else:
             print("Opcao invalida.")
 main()
+
