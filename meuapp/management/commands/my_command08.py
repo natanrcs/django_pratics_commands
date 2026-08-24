@@ -1,28 +1,29 @@
-"""fazendo o mesmo desafio sem framework"""
-"""consulta no azure,lista todas as imagens do acr,quais libs se conecta ao azure"""
-import argparse
+#Desafio do cep em programacao orientada a objetos
 import requests
 from pprint import pformat
+class Cep():
+    def __init__(self,cep: str):
+        self.cep = cep.replace("-","").strip()
 
-def main():
-    parser= argparse.ArgumentParser(description="Desafio do Pablito script sem Framework!")
-    parser.add_argument("--cep",type=str,required=True)
-    parser.add_argument("--natan",type=str,required=True)
-    arguments= parser.parse_args()
-    cep= arguments.cep.replace("-","").strip()
-    url=f"https://viacep.com.br/ws/{cep}/json/"
-    if len(cep) != 8 or not cep.isdigit():
-        messager_error= f"error: cep deve contem 8 digitos"
-        print(messager_error)
-    try:
-        requi= requests.get(url,timeout=15)
-        if requi.status_code ==200:
-            dados=requi.json()
-            results= {"cep": dados["cep"],"logradouro": dados["logradouro"],"local": dados["localidade"],"bairro": dados["bairro"],"uf": dados["uf"],"ibge": dados["ibge"]}
-            format= pformat(results)
-            print(f"{format}")
-    except requests.RequestException as error:
-        print(f"error in request:{error}")
+    def validar_cep(self):
+        if len(self.cep) != 8:
+            return "O cep deve conter 8 digitos"
+        return "Cep válido! tudo certo!"
 
-if __name__ == "__main__":
-    main()
+    def buscar_infos_cep(self):
+        url = f"https://viacep.com.br/ws/{self.cep}/json/"
+        response = requests.get(url,timeout=15)
+        if response.status_code == 200:
+            data = pformat(response.json())
+            return f"Os dados do seu cep são: {data}"
+        else:
+            return f"Erro ao consultar {self.cep},nenhum dados retornados!"
+
+    def teste(self):
+        return f"Meu cep de casa é: {self.cep}"
+
+my_cep_home= Cep("06149-203")
+cep2= Cep("01001-000")
+print(my_cep_home.validar_cep())
+print(my_cep_home.buscar_infos_cep())
+print(my_cep_home.teste())
